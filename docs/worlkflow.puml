@@ -1,0 +1,86 @@
+@startuml PlatformProvisioningWorkflow
+
+title Platform Provisioning Workflow
+
+actor Requester as requester#21BCFF
+
+box "Backstage"#ECFDF5
+participant "Backstage Template" as backstage#2D9966
+entity "BackStage Form" as request#2D9966
+entity "BackStage Task" as task#2D9966
+entity "Tenant Configuration" as tenant_config#9AE630
+end box
+
+box "Github Live" #ECFCCA
+  participant "Github Live Repository" as live#9AE630
+  entity "Tenant PR" as pr#9AE630
+  participant "Github Action" as github_action#9AE630
+end box
+
+participant "Github Terraform\nModules Repository" as modules#C27AFF
+
+actor "Reviewer" as reviewer#155DFC
+
+box "AWS"#FEF3C6
+  participant "AWS" as aws#FF8904
+  participant "S3 bucket For\nTenant States" as s3bucket#FE9A37
+end box
+
+requester -> backstage: Request Provisioning of\nNew Platform for Tenant
+activate backstage#2D9966
+  backstage -> request **: Provide Plauform\nProvisioning Request\nForm
+  request --> backstage
+  backstage --> requester: Provide Form to Fill Out
+deactivate backstage
+activate requester#21BCFF
+  requester -> request: Fill out Form\nTenantName, Environment, Components
+  requester <-- request: Get Confirmation
+  requester -> request: Confirm Request
+deactivate requester
+activate request#2D9966
+  request --> backstage: Form Submitted
+deactivate request
+activate backstage#2D9966
+  backstage -> task **: Create Backstage Task\nfor Provisioning
+  task --> backstage: Task Created
+  backstage --> task: Execute Task
+  activate task#2D9966
+    task -> live: Checkout Live Repository
+    activate live#9AE630
+      task <-- live: main Branch Checked Out
+    deactivate live
+    task --> tenant_config **: Create Tenant Configuration\nterragrunt.hcl
+    activate tenant_config#9AE630
+      tenant_config --> task
+    deactivate tenant_config
+    task --> live: Create PR for Tenant Configuration
+    activate live#9AE630
+      live -> pr **: PR Created for\nTenant Configuration
+      pr --> reviewer: request PR Review
+    deactivate live
+deactivate backstage
+activate reviewer#155DFC
+  reviewer --> pr: Approve and Merge PR
+deactivate reviewer
+activate pr#9AE630
+  pr --> github_action: Trigger Github Workflow\nfor Provisioning
+deactivate pr
+activate github_action#9AE630
+  github_action -> modules: Checkout Terraform Modules\nRepository
+  activate modules#C27AFF
+    github_action <-- modules: main Branch Checked Out
+  deactivate modules
+  github_action -> aws: Provision Platform for Tenant
+  activate aws#FF8904
+    aws -> aws: Provision Platform for Tenant\nas Requested\nin Backstage Form
+    aws --> github_action: confirm
+  deactivate aws
+  github_action -> s3bucket: Store Tenant State (.tfstate) in S3 Bucket
+  activate s3bucket#FE9A37
+    github_action <-- s3bucket: State Stored
+  deactivate s3bucket
+deactivate github_action
+
+
+
+@enduml
