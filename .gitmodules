@@ -1,9 +1,12 @@
 [submodule "backstage"]
 	path = backstage
 	url = https://github.com/hoangviet1vu/hello-terragrunt-backstage.git
+	branch = main
 [submodule "modules"]
 	path = modules
 	url = https://github.com/hoangviet1vu/hello-terragrunt-modules.git
+	branch = main
 [submodule "live"]
 	path = live
 	url = https://github.com/hoangviet1vu/hello-terragrunt-live.git
+	branch = main
