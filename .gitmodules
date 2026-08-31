@@ -1,0 +1,9 @@
+[submodule "backstage"]
+	path = backstage
+	url = https://github.com/hoangviet1vu/hello-terragrunt-backstage.git
+[submodule "modules"]
+	path = modules
+	url = https://github.com/hoangviet1vu/hello-terragrunt-modules.git
+[submodule "live"]
+	path = live
+	url = https://github.com/hoangviet1vu/hello-terragrunt-live.git
